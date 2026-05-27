@@ -1,0 +1,15 @@
+# 秘密情報
+.env
+.env.*
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# Claude Code 内部ファイル
+.agents/
