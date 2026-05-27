@@ -2,8 +2,17 @@
 AI ライティングツール - ホームページ
 """
 
+import sys
 import streamlit as st
-from utils.gemini_client import check_api_key
+
+# 起動診断（エラー原因の特定用）
+try:
+    from utils.gemini_client import check_api_key
+except Exception as _import_error:
+    st.set_page_config(page_title="起動エラー")
+    st.error(f"⚠️ 起動エラー: {_import_error}")
+    st.code(f"Python: {sys.version}\nError type: {type(_import_error).__name__}")
+    st.stop()
 
 # ページ設定
 st.set_page_config(
