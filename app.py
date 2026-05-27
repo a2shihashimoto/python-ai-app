@@ -3,6 +3,8 @@ AI ライティングツール - ホームページ
 """
 
 import os
+import re
+from urllib.parse import quote
 
 import streamlit as st
 from utils.gemini_client import check_api_key
@@ -32,24 +34,31 @@ st.markdown(
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
-    .tool-card {
+    /* <a> タグ全体をカードに見せる（<span> でブロック要素を回避） */
+    a.tool-card {
+        display: block;
         background: #f8f9fa;
         border-radius: 12px;
         padding: 1.2rem;
         border-left: 4px solid #1f77b4;
         margin-bottom: 1rem;
+        text-decoration: none !important;
+        color: inherit !important;
         transition: transform 0.2s;
     }
-    .tool-card:hover {
+    a.tool-card:hover {
         transform: translateX(4px);
+        text-decoration: none !important;
     }
-    .tool-title {
+    span.tool-title {
+        display: block;
         font-size: 1.1rem;
         font-weight: bold;
         margin-bottom: 0.3rem;
         color: #262730;
     }
-    .tool-desc {
+    span.tool-desc {
+        display: block;
         color: #555;
         font-size: 0.9rem;
         line-height: 1.5;
@@ -104,58 +113,74 @@ st.divider()
 # ツール一覧
 st.subheader("🛠️ 利用できるツール")
 
+def _page_href(page_path: str) -> str:
+    """pages/NN_name.py → Streamlit ページ URL（例: /%F0%9F%93%9D_...）"""
+    stem = os.path.basename(page_path)[:-3]       # .py を除去
+    slug = re.sub(r"^\d+[_.]", "", stem)           # 先頭 NN_ を除去
+    return "/" + quote(slug, safe="")              # URL エンコード
+
+
 tools = [
     {
         "emoji": "📝",
         "name": "ブログ記事執筆",
         "desc": "テーマ・ターゲット・文字数を指定してブログ記事を自動生成します。SEO向けの見出し構成も考慮します。",
+        "page": "pages/01_📝_ブログ記事執筆.py",
     },
     {
         "emoji": "📧",
         "name": "メール返信",
         "desc": "受信したメール文を貼り付けると、適切なトーンで返信文を生成します。ビジネス・カジュアル対応。",
+        "page": "pages/02_📧_メール返信.py",
     },
     {
         "emoji": "📄",
         "name": "文章要約",
         "desc": "長い文章を指定した文字数・形式（箇条書き/段落）で簡潔に要約します。",
+        "page": "pages/03_📄_文章要約.py",
     },
     {
         "emoji": "✏️",
         "name": "文章校正",
         "desc": "誤字脱字のチェックと文章表現の改善提案を行います。修正箇所を分かりやすく表示します。",
+        "page": "pages/04_✏️_文章校正.py",
     },
     {
         "emoji": "📱",
         "name": "SNS投稿文生成",
         "desc": "X（Twitter）・Instagram向けに最適化された投稿文とハッシュタグを生成します。",
+        "page": "pages/05_📱_SNS投稿文生成.py",
     },
     {
         "emoji": "🏷️",
         "name": "タイトル・キャッチコピー生成",
         "desc": "記事・動画・商品のタイトルやキャッチコピーを複数パターン提案します。",
+        "page": "pages/06_🏷️_タイトル生成.py",
     },
     {
         "emoji": "🔄",
         "name": "文体変換",
         "desc": "文章のトーンをフォーマル・カジュアル・丁寧・簡潔など自由に変換します。",
+        "page": "pages/07_🔄_文体変換.py",
     },
     {
         "emoji": "🌐",
         "name": "翻訳",
         "desc": "日本語・英語・中国語など16言語に対応。自然な意訳からビジネス文書向けまでスタイルを選んで翻訳します。",
+        "page": "pages/08_🌐_翻訳.py",
     },
 ]
 
-# 2列レイアウトでカード表示
+# 2列レイアウトでカード表示（<a><span> で1要素を維持しつつクリッカブルに）
 col1, col2 = st.columns(2)
 for i, tool in enumerate(tools):
+    href = _page_href(tool["page"])
     with col1 if i % 2 == 0 else col2:
         st.markdown(
-            f"""<div class="tool-card">
-                <div class="tool-title">{tool['emoji']} {tool['name']}</div>
-                <div class="tool-desc">{tool['desc']}</div>
-            </div>""",
+            f'<a href="{href}" class="tool-card">'
+            f'<span class="tool-title">{tool["emoji"]} {tool["name"]}</span>'
+            f'<span class="tool-desc">{tool["desc"]}</span>'
+            f'</a>',
             unsafe_allow_html=True,
         )
 
