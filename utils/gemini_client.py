@@ -30,7 +30,7 @@ def get_client() -> genai.Client:
 
 def generate_text(
     prompt: str,
-    model_name: str = "gemini-2.0-flash",
+    model_name: str = "gemini-2.5-flash",
     temperature: float = 0.7,
     max_output_tokens: int = 4096,
 ) -> str:
@@ -63,7 +63,7 @@ def generate_text(
 
 def stream_text(
     prompt: str,
-    model_name: str = "gemini-2.0-flash",
+    model_name: str = "gemini-2.5-flash",
     temperature: float = 0.7,
     max_output_tokens: int = 4096,
 ):
