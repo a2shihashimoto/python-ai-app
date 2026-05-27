@@ -2,6 +2,10 @@
 AI ライティングツール - ホームページ
 """
 
+import os
+import re
+from urllib.parse import quote
+
 import streamlit as st
 from utils.gemini_client import check_api_key
 
@@ -30,36 +34,34 @@ st.markdown(
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
-    /* ===== クリッカブルツールカード ===== */
-    /* page_link をカード風にスタイリング */
-    a[data-testid="stPageLink-NavLink"] {
-        display: block !important;
-        background: #f8f9fa !important;
-        border-radius: 12px 12px 0 0 !important;
-        padding: 1rem 1.2rem 0.7rem 1.2rem !important;
-        border-left: 4px solid #1f77b4 !important;
-        color: #262730 !important;
-        font-size: 1.1rem !important;
-        font-weight: bold !important;
-        text-decoration: none !important;
-        transition: background 0.2s, color 0.2s !important;
-        margin-bottom: 0 !important;
-    }
-    a[data-testid="stPageLink-NavLink"]:hover {
-        background: #e8f0fe !important;
-        color: #1f77b4 !important;
-        text-decoration: none !important;
-    }
-    /* カード説明文（page_link の直下） */
-    .tool-card-desc {
+    /* ===== ツールカード（1要素・全体クリッカブル） ===== */
+    a.tool-card {
+        display: block;
         background: #f8f9fa;
-        border-radius: 0 0 12px 12px;
-        padding: 0.4rem 1.2rem 1rem 1.2rem;
+        border-radius: 12px;
+        padding: 1.2rem;
         border-left: 4px solid #1f77b4;
+        margin-bottom: 1rem;
+        text-decoration: none !important;
+        color: inherit !important;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    a.tool-card:hover {
+        transform: translateX(4px);
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.08);
+        text-decoration: none !important;
+        color: inherit !important;
+    }
+    .tool-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 0.3rem;
+        color: #262730;
+    }
+    .tool-desc {
         color: #555;
         font-size: 0.9rem;
-        margin-top: -4px;
-        margin-bottom: 1rem;
+        line-height: 1.5;
     }
     .api-warning {
         background: #fff3cd;
@@ -110,6 +112,14 @@ st.divider()
 
 # ツール一覧
 st.subheader("🛠️ 利用できるツール")
+
+
+def _page_href(page_path: str) -> str:
+    """pages/NN_name.py → Streamlit ページの URL スラグ（例: /📝_ブログ記事執筆）"""
+    stem = os.path.basename(page_path)[:-3]          # .py を除去
+    slug = re.sub(r"^\d+[_.]", "", stem)              # 先頭の NN_ を除去
+    return "/" + quote(slug, safe="")                 # URL エンコード
+
 
 tools = [
     {
@@ -162,19 +172,16 @@ tools = [
     },
 ]
 
-# 2列レイアウトでカード表示（クリッカブル）
+# 2列レイアウトでカード表示（1要素 <a> タグ → 分割ライン解消）
 col1, col2 = st.columns(2)
 for i, tool in enumerate(tools):
+    href = _page_href(tool["page"])
     with col1 if i % 2 == 0 else col2:
-        # タイトル部分：st.page_link でクリッカブルカード
-        st.page_link(
-            tool["page"],
-            label=f"{tool['emoji']} {tool['name']}",
-            use_container_width=True,
-        )
-        # 説明文：カード下半分として CSS で連結
         st.markdown(
-            f'<div class="tool-card-desc">{tool["desc"]}</div>',
+            f'<a href="{href}" class="tool-card">'
+            f'<div class="tool-title">{tool["emoji"]} {tool["name"]}</div>'
+            f'<div class="tool-desc">{tool["desc"]}</div>'
+            f'</a>',
             unsafe_allow_html=True,
         )
 
@@ -190,7 +197,6 @@ with st.sidebar:
         placeholder="AIza...",
     )
     if api_key_input:
-        import os
         os.environ["GEMINI_API_KEY"] = api_key_input
         st.success("✅ APIキーを設定しました")
 
