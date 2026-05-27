@@ -1,39 +1,36 @@
 """
-Gemini API クライアントのユーティリティ
+Gemini API クライアントのユーティリティ（google-genai SDK）
 """
 
 import os
 import streamlit as st
-import google.generativeai as genai
 from dotenv import load_dotenv
+from google import genai
+from google.genai import types
 
 load_dotenv()
 
 
 def get_api_key() -> str:
     """APIキーを環境変数またはStreamlit secretsから取得する"""
-    # Streamlit secrets を優先（本番環境向け）
     try:
         return st.secrets["GEMINI_API_KEY"]
     except (KeyError, FileNotFoundError):
         pass
-    # .env ファイルから取得
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    return api_key
+    return os.getenv("GEMINI_API_KEY", "")
 
 
-def get_model(model_name: str = "gemini-2.5-flash") -> genai.GenerativeModel:
-    """Geminiモデルを初期化して返す"""
+def get_client() -> genai.Client:
+    """Gemini クライアントを初期化して返す"""
     api_key = get_api_key()
     if not api_key:
         raise ValueError("GEMINI_API_KEY が設定されていません。")
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel(model_name)
+    return genai.Client(api_key=api_key)
 
 
 def generate_text(
     prompt: str,
-    model_name: str = "gemini-2.5-flash",
+    model_name: str = "gemini-2.0-flash",
     temperature: float = 0.7,
     max_output_tokens: int = 4096,
 ) -> str:
@@ -49,18 +46,21 @@ def generate_text(
     Returns:
         生成されたテキスト
     """
-    model = get_model(model_name)
-    generation_config = genai.types.GenerationConfig(
-        temperature=temperature,
-        max_output_tokens=max_output_tokens,
+    client = get_client()
+    response = client.models.generate_content(
+        model=model_name,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            temperature=temperature,
+            max_output_tokens=max_output_tokens,
+        ),
     )
-    response = model.generate_content(prompt, generation_config=generation_config)
     return response.text
 
 
 def stream_text(
     prompt: str,
-    model_name: str = "gemini-2.5-flash",
+    model_name: str = "gemini-2.0-flash",
     temperature: float = 0.7,
     max_output_tokens: int = 4096,
 ):
@@ -76,17 +76,15 @@ def stream_text(
     Yields:
         生成されたテキストのチャンク
     """
-    model = get_model(model_name)
-    generation_config = genai.types.GenerationConfig(
-        temperature=temperature,
-        max_output_tokens=max_output_tokens,
-    )
-    response = model.generate_content(
-        prompt,
-        generation_config=generation_config,
-        stream=True,
-    )
-    for chunk in response:
+    client = get_client()
+    for chunk in client.models.generate_content_stream(
+        model=model_name,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            temperature=temperature,
+            max_output_tokens=max_output_tokens,
+        ),
+    ):
         if chunk.text:
             yield chunk.text
 
