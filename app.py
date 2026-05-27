@@ -2,10 +2,6 @@
 AI ライティングツール - ホームページ
 """
 
-import os
-import re
-from urllib.parse import quote
-
 import streamlit as st
 from utils.gemini_client import check_api_key
 
@@ -34,34 +30,37 @@ st.markdown(
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
-    /* <a> タグ全体をカードに見せる（<span> でブロック要素を回避） */
-    a.tool-card {
-        display: block;
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 1.2rem;
-        border-left: 4px solid #1f77b4;
-        margin-bottom: 1rem;
+    /* st.page_link() をカード全体に見せる（1要素・ギャップなし） */
+    a[data-testid="stPageLink-NavLink"] {
+        display: block !important;
+        background: #f8f9fa !important;
+        border-radius: 12px !important;
+        padding: 1.2rem !important;
+        border-left: 4px solid #1f77b4 !important;
+        white-space: pre-line !important;   /* \n を改行として表示 */
+        color: #555 !important;             /* 説明文の色 */
+        font-size: 0.9rem !important;
+        line-height: 1.6 !important;
         text-decoration: none !important;
-        color: inherit !important;
-        transition: transform 0.2s;
+        transition: transform 0.2s !important;
+        height: auto !important;
     }
-    a.tool-card:hover {
-        transform: translateX(4px);
+    a[data-testid="stPageLink-NavLink"]:hover {
+        transform: translateX(4px) !important;
         text-decoration: none !important;
     }
-    span.tool-title {
-        display: block;
-        font-size: 1.1rem;
-        font-weight: bold;
-        margin-bottom: 0.3rem;
-        color: #262730;
+    /* 1行目（ツール名）だけ太字・大きく */
+    a[data-testid="stPageLink-NavLink"]::first-line {
+        font-weight: bold !important;
+        font-size: 1.1rem !important;
+        color: #262730 !important;
     }
-    span.tool-desc {
-        display: block;
-        color: #555;
-        font-size: 0.9rem;
-        line-height: 1.5;
+    /* 子 span にも white-space を継承させる */
+    a[data-testid="stPageLink-NavLink"] span {
+        white-space: pre-line !important;
+    }
+    div[data-testid="stPageLink"] {
+        margin-bottom: 0.5rem !important;
     }
     .api-warning {
         background: #fff3cd;
@@ -112,13 +111,6 @@ st.divider()
 
 # ツール一覧
 st.subheader("🛠️ 利用できるツール")
-
-def _page_href(page_path: str) -> str:
-    """pages/NN_name.py → Streamlit ページ URL（例: /%F0%9F%93%9D_...）"""
-    stem = os.path.basename(page_path)[:-3]       # .py を除去
-    slug = re.sub(r"^\d+[_.]", "", stem)           # 先頭 NN_ を除去
-    return "/" + quote(slug, safe="")              # URL エンコード
-
 
 tools = [
     {
@@ -171,17 +163,16 @@ tools = [
     },
 ]
 
-# 2列レイアウトでカード表示（<a><span> で1要素を維持しつつクリッカブルに）
+# 2列レイアウトでカード表示
+# st.page_link() を使うことで Streamlit が URL を正確に解決する
+# label に \n を入れ CSS white-space:pre-line で2行表示 → 1要素でギャップなし
 col1, col2 = st.columns(2)
 for i, tool in enumerate(tools):
-    href = _page_href(tool["page"])
     with col1 if i % 2 == 0 else col2:
-        st.markdown(
-            f'<a href="{href}" class="tool-card">'
-            f'<span class="tool-title">{tool["emoji"]} {tool["name"]}</span>'
-            f'<span class="tool-desc">{tool["desc"]}</span>'
-            f'</a>',
-            unsafe_allow_html=True,
+        st.page_link(
+            tool["page"],
+            label=f"{tool['emoji']} {tool['name']}\n{tool['desc']}",
+            use_container_width=True,
         )
 
 st.divider()
