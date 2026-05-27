@@ -30,25 +30,36 @@ st.markdown(
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
-    .tool-card {
+    /* ===== クリッカブルツールカード ===== */
+    /* page_link をカード風にスタイリング */
+    a[data-testid="stPageLink-NavLink"] {
+        display: block !important;
+        background: #f8f9fa !important;
+        border-radius: 12px 12px 0 0 !important;
+        padding: 1rem 1.2rem 0.7rem 1.2rem !important;
+        border-left: 4px solid #1f77b4 !important;
+        color: #262730 !important;
+        font-size: 1.1rem !important;
+        font-weight: bold !important;
+        text-decoration: none !important;
+        transition: background 0.2s, color 0.2s !important;
+        margin-bottom: 0 !important;
+    }
+    a[data-testid="stPageLink-NavLink"]:hover {
+        background: #e8f0fe !important;
+        color: #1f77b4 !important;
+        text-decoration: none !important;
+    }
+    /* カード説明文（page_link の直下） */
+    .tool-card-desc {
         background: #f8f9fa;
-        border-radius: 12px;
-        padding: 1.2rem;
+        border-radius: 0 0 12px 12px;
+        padding: 0.4rem 1.2rem 1rem 1.2rem;
         border-left: 4px solid #1f77b4;
-        margin-bottom: 1rem;
-        transition: transform 0.2s;
-    }
-    .tool-card:hover {
-        transform: translateX(4px);
-    }
-    .tool-title {
-        font-size: 1.1rem;
-        font-weight: bold;
-        margin-bottom: 0.3rem;
-    }
-    .tool-desc {
         color: #555;
         font-size: 0.9rem;
+        margin-top: -4px;
+        margin-bottom: 1rem;
     }
     .api-warning {
         background: #fff3cd;
@@ -105,50 +116,59 @@ tools = [
         "emoji": "📝",
         "name": "ブログ記事執筆",
         "desc": "テーマ・ターゲット・文字数を指定してブログ記事を自動生成します。SEO向けの見出し構成も考慮します。",
+        "page": "pages/01_📝_ブログ記事執筆.py",
     },
     {
         "emoji": "📧",
         "name": "メール返信",
         "desc": "受信したメール文を貼り付けると、適切なトーンで返信文を生成します。ビジネス・カジュアル対応。",
+        "page": "pages/02_📧_メール返信.py",
     },
     {
         "emoji": "📄",
         "name": "文章要約",
         "desc": "長い文章を指定した文字数・形式（箇条書き/段落）で簡潔に要約します。",
+        "page": "pages/03_📄_文章要約.py",
     },
     {
         "emoji": "✏️",
         "name": "文章校正",
         "desc": "誤字脱字のチェックと文章表現の改善提案を行います。修正箇所を分かりやすく表示します。",
+        "page": "pages/04_✏️_文章校正.py",
     },
     {
         "emoji": "📱",
         "name": "SNS投稿文生成",
         "desc": "X（Twitter）・Instagram向けに最適化された投稿文とハッシュタグを生成します。",
+        "page": "pages/05_📱_SNS投稿文生成.py",
     },
     {
         "emoji": "🏷️",
         "name": "タイトル・キャッチコピー生成",
         "desc": "記事・動画・商品のタイトルやキャッチコピーを複数パターン提案します。",
+        "page": "pages/06_🏷️_タイトル生成.py",
     },
     {
         "emoji": "🔄",
         "name": "文体変換",
         "desc": "文章のトーンをフォーマル・カジュアル・丁寧・簡潔など自由に変換します。",
+        "page": "pages/07_🔄_文体変換.py",
     },
 ]
 
-# 2列レイアウトでカード表示
+# 2列レイアウトでカード表示（クリッカブル）
 col1, col2 = st.columns(2)
 for i, tool in enumerate(tools):
     with col1 if i % 2 == 0 else col2:
+        # タイトル部分：st.page_link でクリッカブルカード
+        st.page_link(
+            tool["page"],
+            label=f"{tool['emoji']} {tool['name']}",
+            use_container_width=True,
+        )
+        # 説明文：カード下半分として CSS で連結
         st.markdown(
-            f"""
-            <div class="tool-card">
-                <div class="tool-title">{tool['emoji']} {tool['name']}</div>
-                <div class="tool-desc">{tool['desc']}</div>
-            </div>
-            """,
+            f'<div class="tool-card-desc">{tool["desc"]}</div>',
             unsafe_allow_html=True,
         )
 
