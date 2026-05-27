@@ -158,7 +158,7 @@ if st.button("🌐 翻訳する", type="primary", use_container_width=True):
                 result_container.markdown(full_text)
         except Exception as e:
             logger.error("翻訳中にエラーが発生しました: %s", e, exc_info=True)
-            st.error("翻訳中にエラーが発生しました。しばらく後に再試行してください。")
+            st.error(f"エラーが発生しました: {e}")
             st.stop()
 
     st.success("✅ 翻訳が完了しました！")

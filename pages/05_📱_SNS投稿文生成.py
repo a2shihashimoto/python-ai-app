@@ -127,7 +127,7 @@ if st.button("📱 投稿文を生成する", type="primary", use_container_widt
                 result_container.markdown(full_text)
         except Exception as e:
             logger.error("投稿文生成中にエラーが発生しました: %s", e, exc_info=True)
-            st.error("投稿文生成中にエラーが発生しました。しばらく後に再試行してください。")
+            st.error(f"エラーが発生しました: {e}")
             st.stop()
 
     st.success("✅ 投稿文の生成が完了しました！")

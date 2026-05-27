@@ -1,5 +1,5 @@
 """
-Gemini API クライアントのユーティリティ（google-genai SDK）
+Gemini API クライアントのユーティリティ（google-genai SDK v2.x）
 """
 
 import os
@@ -35,7 +35,7 @@ def generate_text(
     max_output_tokens: int = 4096,
 ) -> str:
     """
-    テキストを生成して返す
+    テキストを生成して返す（一括生成）
 
     Args:
         prompt: プロンプト文字列
@@ -49,7 +49,10 @@ def generate_text(
     client = get_client()
     response = client.models.generate_content(
         model=model_name,
-        contents=prompt,
+        contents=types.Content(
+            role="user",
+            parts=[types.Part(text=prompt)],
+        ),
         config=types.GenerateContentConfig(
             temperature=temperature,
             max_output_tokens=max_output_tokens,
@@ -79,7 +82,10 @@ def stream_text(
     client = get_client()
     for chunk in client.models.generate_content_stream(
         model=model_name,
-        contents=prompt,
+        contents=types.Content(
+            role="user",
+            parts=[types.Part(text=prompt)],
+        ),
         config=types.GenerateContentConfig(
             temperature=temperature,
             max_output_tokens=max_output_tokens,

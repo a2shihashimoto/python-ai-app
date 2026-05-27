@@ -117,7 +117,7 @@ if st.button("✏️ 文章を校正・改善する", type="primary", use_contai
             result = generate_text(prompt, temperature=0.3)
         except Exception as e:
             logger.error("校正中にエラーが発生しました: %s", e, exc_info=True)
-            st.error("校正中にエラーが発生しました。しばらく後に再試行してください。")
+            st.error(f"エラーが発生しました: {e}")
             st.stop()
 
     st.success("✅ 校正が完了しました！")

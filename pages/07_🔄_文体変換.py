@@ -140,7 +140,7 @@ if st.button("🔄 文体を変換する", type="primary", use_container_width=T
                 result_container.markdown(full_text)
         except Exception as e:
             logger.error("文体変換中にエラーが発生しました: %s", e, exc_info=True)
-            st.error("文体変換中にエラーが発生しました。しばらく後に再試行してください。")
+            st.error(f"エラーが発生しました: {e}")
             st.stop()
 
     st.success("✅ 文体変換が完了しました！")
